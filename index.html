@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SepsisAI | Early Warning System for ICU</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; color: #334155; line-height: 1.6; }
+        .hero-section { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 80px 0; }
+        .medical-blue { color: #0284c7; }
+        .stat-card { border: none; border-top: 4px solid #0284c7; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .abstract-box { background-color: #f8fafc; border-left: 5px solid #cbd5e1; padding: 25px; font-style: italic; }
+        .badge-clinical { background-color: #e0f2fe; color: #0369a1; font-weight: 600; }
+        .table-clinical thead { background-color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">🏥 Sepsis<span class="medical-blue">AI</span></a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="#methodology">Methodology</a>
+                <a class="nav-link" href="#results">Results</a>
+                <a class="nav-link" href="https://github.com/your-username/repo">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Predicting Sepsis: The Race Against Time</h1>
+                    <p class="lead mb-4">
+                        Sepsis is a life-threatening medical emergency triggered by an extreme, dysregulated immune response to infection. In the high-stakes environment of the Intensive Care Unit (ICU), sepsis is a primary driver of mortality because of its deceptive and rapid progression; for every hour that targeted treatment is delayed, the risk of death increases by approximately 7.6%. 
+                    </p>
+                    <p class="lead">
+                        Developing a predictive model is essential because it transforms the ICU from a <strong>reactive</strong> environment to a <strong>proactive</strong> one. By leveraging real-time physiological data to identify high-risk patterns 1–4 hours before clinical onset, our model provides a critical window for physicians to initiate life-saving interventions, improving patient survival rates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="methodology" class="container my-5">
+        <div class="row">
+            <div class="col-md-4">
+                <h3 class="fw-bold medical-blue">Project Abstract</h3>
+                <p class="text-muted small">MIMIC-IV Based Research</p>
+            </div>
+            <div class="col-md-8">
+                <div class="abstract-box">
+                    "Sepsis is a leading cause of mortality in intensive care units (ICUs), where timely recognition is critical for improving patient outcomes. In this study, we develop an ICU-hour–level early warning model using the MIMIC-IV database... Leveraging structured EHR data, we construct a temporally aligned prediction framework that estimates sepsis onset within a forward 1–4 hour window using only routinely collected vital signs."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="results" class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Model Performance Metrics</h2>
+            <div class="row g-4 text-center">
+                <div class="col-md-3">
+                    <div class="card stat-card p-3">
+                        <h2 class="fw-bold medical-blue">81.0%</h2>
+                        <p class="text-uppercase small fw-bold">Sensitivity</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card p-3">
+                        <h2 class="fw-bold medical-blue">95.9%</h2>
+                        <p class="text-uppercase small fw-bold">Specificity</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card p-3">
+                        <h2 class="fw-bold medical-blue">52.4%</h2>
+                        <p class="text-uppercase small fw-bold">Precision</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stat-card p-3">
+                        <h2 class="fw-bold medical-blue">10x</h2>
+                        <p class="text-uppercase small fw-bold">Precision Lift</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container my-5">
+        <h3 class="fw-bold mb-4">Framework Specifications</h3>
+        <table class="table table-bordered table-clinical shadow-sm">
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Specification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Data Source</strong></td>
+                    <td>MIMIC-IV (26,105 ICU Stays)</td>
+                </tr>
+                <tr>
+                    <td><strong>Observation Unit</strong></td>
+                    <td>940,734 ICU-hour observations</td>
+                </tr>
+                <tr>
+                    <td><strong>Classifier</strong></td>
+                    <td>Random Forest (Stay-level split
