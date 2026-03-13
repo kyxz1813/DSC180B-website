@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sepsis Sentinel | Early Warning System for ICU</title>
@@ -16,6 +18,52 @@
         .table-clinical thead { background-color: #f1f5f9; }
     </style>
 </head>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Interactive Table
+        $('#modelTable').DataTable({
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "order": [[2, "desc"]] // Sort by PR-AUC by default
+        });
+
+        // Initialize Cost Matrix Heatmap
+        const ctx = document.getElementById('costMatrixChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['True Negative', 'False Positive', 'False Negative', 'True Positive'],
+                datasets: [{
+                    label: 'Patient Hours',
+                    data: [53224, 68471, 17860, 278381], // Data from image_f25ca4
+                    backgroundColor: [
+                        'rgba(203, 213, 225, 0.8)', // Grey (TN)
+                        'rgba(254, 202, 202, 0.8)', // Red-ish (FP)
+                        'rgba(239, 68, 68, 1)',     // Bright Red (FN - Danger!)
+                        'rgba(2, 132, 199, 0.8)'    // Blue (TP)
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
+
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -23,7 +71,7 @@
             <a class="navbar-brand fw-bold" href="#">🏥 Sepsis<span class="medical-blue">Sentinel</span></a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="https://drive.google.com/file/d/1Kgsf4aABXMMYsouqqhoU0IzHJqhD6ZJa/view?usp=drive_link">Report</a>
-                <a class="nav-link" href="https://drive.google.com/file/d/1HKEcjVQQDmGAUAw7-k2w5qRke8nIA5J6/view?usp=drive_link">Poster</a>
+                <a class="nav-link" href="https://drive.google.com/file/d/1eEu3Zzi6v-4f1_9S2eFWRBUzN8m0u1CK/view?usp=sharing">Poster</a>
                 <a class="nav-link" href="https://github.com/kyxz1813/dsc180B-sepsis-model.git">GitHub</a>
             </div>
         </div>
@@ -65,19 +113,19 @@
             <div class="row g-4 text-center">
                 <div class="col-md-3">
                     <div class="card stat-card p-3">
-                        <h2 class="fw-bold medical-blue">81.0%</h2>
+                        <h2 class="fw-bold medical-blue">94.0%</h2>
                         <p class="text-uppercase small fw-bold">Sensitivity</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stat-card p-3">
-                        <h2 class="fw-bold medical-blue">95.9%</h2>
+                        <h2 class="fw-bold medical-blue">44.0%</h2>
                         <p class="text-uppercase small fw-bold">Specificity</p>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card stat-card p-3">
-                        <h2 class="fw-bold medical-blue">52.4%</h2>
+                        <h2 class="fw-bold medical-blue">80.0%</h2>
                         <p class="text-uppercase small fw-bold">Precision</p>
                     </div>
                 </div>
@@ -117,158 +165,392 @@
         </table>
     </section>
 
-    <section id="results" class="bg-light py-5">
+<section id="dataset" class="py-5 bg-white border-top">
     <div class="container">
-        <h2 class="text-center fw-bold mb-5">Model Performance Comparison</h2>
-        <div class="table-responsive shadow-sm bg-white p-4 rounded">
-            <table class="table table-hover table-clinical align-middle">
-                <thead>
-                    <tr>
-                        <th>Model Architecture</th>
-                        <th>ROC-AUC</th>
-                        <th>PR-AUC</th>
-                        <th>F1 Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Random Forest (Primary Model)</strong></td>
-                        <td>0.842</td>
-                        <td>0.925</td>
-                        <td>0.862</td>
-                    </tr>
-                    <tr>
-                        <td>Deep Neural Network (DNN)</td>
-                        <td>0.976</td>
-                        <td>0.643</td>
-                        <td>0.620</td>
-                    </tr>
-                    <tr>
-                        <td>Recurrent Neural Network (RNN)</td>
-                        <td>0.920</td>
-                        <td>0.380</td>
-                        <td>0.428</td>
-                    </tr>
-                    <tr>
-                        <td>Logistic Regression (Baseline)</td>
-                        <td>0.736</td>
-                        <td>0.140</td>
-                        <td>0.0</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p class="text-muted small mt-3">
-                *Results obtained from a held-out stay-level test set from the MIMIC-IV database.
-            </p>
-        </div>
-    </div>
-    </section>
-
-    <!-- <section class="container my-5">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h3 class="fw-bold medical-blue">Addressing Patient Heterogeneity</h3>
-                <p>
-                    Standard sepsis models often treat all patients as a single group, ignoring that chronic disease patterns influence how a body responds to infection. Our research incorporates <strong>Latent Multimorbidity Phenotypes</strong> derived through Latent Class Analysis (LCA).
-                </p>
-                <ul class="list-group list-group-flush mb-4">
-                    <li class="list-group-item"><strong>Cardiopulmonary:</strong> High-risk respiratory and heart patterns.</li>
-                    <li class="list-group-item"><strong>Hepatic/Addiction:</strong> Specific metabolic deterioration signatures.</li>
-                    <li class="list-group-item"><strong>Complicated Diabetes:</strong> Unique glucose and renal trajectories.</li>
-                </ul>
+        <div class="row mb-5">
+            <div class="col-lg-12 text-center">
+                <h2 class="fw-bold medical-blue">MIMIC-IV Data Architecture</h2>
+                <p class="lead">Utilizing high-resolution clinical events for hourly sepsis prediction.</p>
             </div>
-            <div class="col-lg-6">
-                <div class="p-4 border rounded bg-light text-center">
-                    <h5 class="fw-bold">Early Warning Horizon</h5>
-                    <h1 class="display-1 fw-bold medical-blue">1-4h</h1>
-                    <p class="text-uppercase text-muted">Forward Prediction Window</p>
-                    <p class="small">By forecasting onset 1-4 hours in advance, clinicians can initiate the "Golden Hour" of treatment before permanent organ damage occurs.</p>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold">ICU Module Utilization</h4>
+
+                <p>
+                    Our study is powered by the Medical Information Mart for Intensive Care IV (MIMIC-IV) database, a massive, de-identified repository of real-world clinical data from patients admitted to the Beth Israel Deaconess Medical Center. This dataset offers a standardized platform for developing early warning systems under realistic critical care conditions. 
+                </p>
+
+                <p>
+                    While MIMIC-IV covers broad hospital data, our research exclusively utilizes the ICU Module. This allows us to access high-resolution, timestamped clinical events and hourly physiologic measurements essential for tracking rapid sepsis deterioration.
+                </p>
+
+                <div class="alert alert-info small shadow-sm">
+                    <strong>Note:</strong> Sepsis onset is defined using structured timestamp fields, prioritizing <strong>SOFA-based criteria</strong> to ensure clinical relevance.
                 </div>
             </div>
         </div>
-    </section> -->
 
-    <section id="phenotypes" class="py-5 bg-white">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-12 text-center mb-5">
-                <h2 class="fw-bold medical-blue">Multimorbidity Phenotypes</h2>
-                <p class="lead">Addressing the "One-Size-Fits-All" limitation in clinical prediction.</p>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-dark text-white fw-bold">
+                        The <code>chartevents</code> Table Structure
+                    </div>
+                    <div class="card-body">
+                        <p class="x-small text-muted mb-3">Primary source for vital signs and physiologic measurements in the ICU.</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0 x-small">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Column Name</th>
+                                        <th>Data Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><code>subject_id</code></td><td>INTEGER</td></tr>
+                                    <tr><td><code>hadm_id</code></td><td>INTEGER</td></tr>
+                                    <tr><td><code>stay_id</code></td><td>INTEGER</td></tr>
+                                    <tr><td><code>caregiver_id</code></td><td>INTEGER</td></tr>
+                                    <tr><td><code>charttime</code></td><td>TIMESTAMP(0)</td></tr>
+                                    <tr><td><code>storetime</code></td><td>TIMESTAMP(0)</td></tr>
+                                    <tr><td><code>itemid</code></td><td>INTEGER</td></tr>
+                                    <tr><td><code>value</code></td><td>VARCHAR(200)</td></tr>
+                                    <tr><td><code>valuenum</code></td><td>DOUBLE PRECISION</td></tr>
+                                    <tr><td><code>valueuom</code></td><td>VARCHAR(20)</td></tr>
+                                    <tr><td><code>warning</code></td><td>SMALLINT</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-dark text-white fw-bold">
+                        Clinical Features Summary
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-primary border-bottom pb-1 small"> Vital Signs</h6>
+                                <ul class="x-small list-unstyled">
+                                    <li>• Heart Rate</li>
+                                    <li>• Systolic Blood Pressure (sbp)</li>
+                                    <li>• Diastolic Blood Pressure (dbp)</li>
+                                    <li>• Mean Blood Pressure (mbp)</li>
+                                    <li>• Respiratory Rate</li>
+                                    <li>• Oxygen Saturation (SpO2)</li>
+                                    <li>• Body Temperature</li>
+                                    <li>• Glucose</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-primary border-bottom pb-1 small"> Lab Values</h6>
+                                <p class="mb-1 fw-bold xx-small text-uppercase">Organ Function</p>
+                                <ul class="xx-small list-unstyled text-muted mb-2">
+                                    <li>• Creatinine (Renal)</li>
+                                    <li>• Bilirubin (Hepatic)</li>
+                                    <li>• Sodium, Potassium, Calcium</li>
+                                </ul>
+                                <p class="mb-1 fw-bold xx-small text-uppercase">Coagulation</p>
+                                <ul class="xx-small list-unstyled text-muted">
+                                    <li>• INR, PT, PTT</li>
+                                    <li>• D-Dimer, Fibrinogen</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 p-2 bg-light rounded border-start border-3 border-primary">
+                            <p class="x-small mb-0">
+                                <strong>Hourly Engineering:</strong> Raw measurements aggregated into Mean, Median, Min, Max, Std Dev, and Count statistics.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        
+    </div>
+</section>
+
+<section id="preprocessing" class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-12 text-center">
+                <h2 class="fw-bold medical-blue">Preprocessing & Model Pipeline</h2>
+                <p class="lead">From raw clinical data to actionable predictive insights.</p>
+            </div>
+        </div>
+
         <div class="row g-4">
             <div class="col-lg-7">
-                <h4 class="fw-bold">Beyond Raw Vital Signs</h4>
+                <h4 class="fw-bold">Data Cleaning & Handling</h4>
                 <p>
-                    Most septic patients possess multiple chronic diseases which cause their bodies to respond differently when an infection begins. While standard systems treat all patients as if they deteriorate identically, our framework uses <strong>Latent Class Analysis (LCA)</strong> to identify shared chronic disease patterns.
+                    Clinical data is inherently messy and sparse. To prepare the <strong>940,734 ICU-hour observations</strong> for our Random Forest classifier, we implemented a rigorous cleaning pipeline:
                 </p>
-                <p>
-                    This approach allows us to investigate whether "silent deteriorators", patients who show only subtle warning signs, can be better identified by understanding their baseline multimorbidity phenotypes.
-                </p>
-                
-                <div class="row row-cols-1 row-cols-md-2 g-3 mt-4">
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 1</span>
-                            <h6><strong>Cardiopulmonary</strong></h6>
-                            <p class="small text-muted">High-risk respiratory and lung-related deterioration signatures.</p>
-                        </div>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item bg-transparent">
+                        <strong>Standardization:</strong> Sepsis indicators were standardized into a binary (0/1) format for consistent labeling.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <strong>Median Imputation:</strong> Predictor variables were imputed using training-set medians to handle missing values while preserving feature distributions.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <strong>All-NaN Removal:</strong> Feature columns entirely missing in the training split were removed to ensure numerical stability.
+                    </li>
+                    <li class="list-group-item bg-transparent">
+                        <strong>Class Imbalance:</strong> We utilized <code>balanced_subsample</code> class weights to address the low (4.5%) event prevalence.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-dark text-white fw-bold">
+                        Random Forest Pipeline Details
                     </div>
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 2</span>
-                            <h6><strong>Cardiac</strong></h6>
-                            <p class="small text-muted">Specific heart-related physiological trajectories.</p>
+                    <div class="card-body">
+                        <div class="p-3 mb-3 bg-light rounded text-center">
+                            <h6 class="fw-bold mb-2">Algorithm Specifications</h6>
+                            <div class="d-flex justify-content-around small">
+                                <span><strong>500</strong> Trees</span>
+                                <span>|</span>
+                                <span><strong>5</strong> Min Leaf Size</span>
+                                <span>|</span>
+                                <span><strong>10</strong> Max Depth</span>
+                            </div>
                         </div>
+                        <h6 class="fw-bold text-primary small">Temporal Integrity Measures</h6>
+                        <p class="x-small text-muted">
+                            To ensure the model is truly predictive and not retrospective, we applied two critical constraints:
+                        </p>
+                        <ol class="x-small text-muted">
+                            <li class="mb-2"><strong>Post-Onset Censoring:</strong> All observations occurring at or after the sepsis onset timestamp were removed to prevent label leakage.</li>
+                            <li><strong>Stay-Level Splitting:</strong> Data was split by <code>stay_id</code> rather than individual rows, ensuring no patient data appeared in both training and test sets.</li>
+                        </ol>
                     </div>
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 3</span>
-                            <h6><strong>Hepatic/Addiction</strong></h6>
-                            <p class="small text-muted">Metabolic instability common in liver-related chronic conditions.</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 4</span>
-                            <h6><strong>Complicated Diabetes</strong></h6>
-                            <p class="small text-muted">Unique glucose and renal trajectories following infection.</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 5</span>
-                            <h6><strong>Uncomplicated Diabetes</strong></h6>
-                            <p class="small text-muted">A baseline diabetic phenotype with more stable deterioration profiles.</p>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="p-3 border rounded shadow-sm h-100">
-                            <span class="badge badge-clinical mb-2">Subgroup 6</span>
-                            <h6><strong>Young</strong></h6>
-                            <p class="small text-muted">Patients with fewer comorbidities who may exhibit rapid, acute onset.</p>
-                        </div>
-                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section id="phenotypes" class="py-5 bg-white border-top">
+    <div class="container">
+        <div class="row mb-5 text-center">
+            <div class="col-lg-12">
+                <h2 class="fw-bold medical-blue">Multimorbidity Phenotypes</h2>
+                <p class="lead">Addressing patient heterogeneity through Latent Class Analysis (LCA).</p>
+            </div>
+        </div>
+
+        <div class="row mb-5 align-items-center">
+            <div class="col-lg-7 text-center">
+                <div class="p-3 border rounded shadow-sm bg-light">
+                    <h6 class="fw-bold mb-3">LCA Cluster Visualizations</h6>
+                    <img src="image/figure3B_final.png" class="img-fluid rounded shadow-sm" 
+                         style="max-width: 550px; height: auto; object-fit: contain;" 
+                         [cite_start]alt="LCA Subgroups Analysis ">
+                    <p class="x-small text-muted mt-2 mb-0">Distribution of chronic conditions across identified latent classes.</p>
                 </div>
             </div>
             
-            <div class="col-lg-5 text-center">
-                <div class="pipeline-box shadow-sm">
-                    <h6 class="fw-bold mb-3">LCA Modeling Framework</h6>
-                    
-                    <p class="small text-muted mt-4">
-                        By combining <strong>phenotype modeling</strong> with <strong>pre-onset trajectory analysis</strong>, we test whether predictive performance varies meaningfully across chronic disease groups.
+            <div class="col-lg-5">
+                <div class="ps-lg-4">
+                    <h4 class="fw-bold">Beyond Raw Vital Signs</h4>
+                    <p class="small text-muted">
+                        Most septic patients possess multiple chronic diseases which cause their bodies to respond differently when an infection begins. Our framework uses <strong>Latent Class Analysis (LCA)</strong> to identify shared chronic disease patterns.
                     </p>
-                    <div class="operating-point mt-3">
-                        <p class="small mb-0"><strong>Layered Modeling:</strong> Vital signs capture short-term acute changes, while LCA subgroups encode longer-term baseline vulnerability.</p>
+                    <div class="p-3 bg-white border-start border-4 border-primary shadow-sm">
+                        <p class="small mb-0">
+                            <strong>Layered Modeling:</strong> By combining phenotype context with pre-onset trajectory analysis, the model captures longer-term baseline vulnerability alongside short-term acute physiologic changes.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    </section>
 
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 1</span>
+                    <h6 class="fw-bold mb-1">Cardiopulmonary</h6>
+                    <p class="x-small text-muted mb-0">Pulmonary circulation, chronic pulmonary issues, and hypertension.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 2</span>
+                    <h6 class="fw-bold mb-1">Young</h6>
+                    <p class="x-small text-muted mb-0">Fewer comorbidities; identifiers include alcohol abuse and depression.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 3</span>
+                    <h6 class="fw-bold mb-1">Hepatic/Addiction</h6>
+                    <p class="x-small text-muted mb-0">Liver disease, alcohol abuse, and fluid electrolyte instability.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 4</span>
+                    <h6 class="fw-bold mb-1">Complicated Diabetes</h6>
+                    <p class="x-small text-muted mb-0">Renal failure, congestive heart failure, and hypertension.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 5</span>
+                    <h6 class="fw-bold mb-1">Uncomplicated Diabetes</h6>
+                    <p class="x-small text-muted mb-0">Uncomplicated diabetes often paired with fluid electrolyte issues.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-3 bg-light">
+                    <span class="badge badge-clinical mb-2" style="width: fit-content;">Subgroup 6</span>
+                    <h6 class="fw-bold mb-1">Cardiac</h6>
+                    <p class="x-small text-muted mb-0">Congestive heart failure, cardiac arrhythmias, and hypertension.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+   <section id="results" class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">Predictive Reliability & Cost Analysis</h2>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card p-4 shadow-sm border-0 h-100">
+                    <h5 class="fw-bold mb-3">Clinical Cost Matrix</h5>
+                    <p class="small text-muted mb-4">
+                        In sepsis care, <strong>False Negatives</strong> (missing a septic patient) are the most dangerous outcome. Our model is specifically tuned to prioritize sensitivity to ensure these high-risk cases are not overlooked.
+                    </p>
+                    
+                    <div class="matrix-container text-center">
+                        <div class="row g-0">
+                            <div class="col-3"></div>
+                            <div class="col-4 fw-bold small">Pred: No Sepsis</div>
+                            <div class="col-4 fw-bold small">Pred: Sepsis</div>
+                        </div>
+                        <div class="row g-0 align-items-center mb-1">
+                            <div class="col-3 fw-bold small text-end pe-2">Actual No Sepsis</div>
+                            <div class="col-4 p-4 border bg-light">53,224 <br><span class="x-small">TN</span></div>
+                            <div class="col-4 p-4 border bg-warning bg-opacity-10">68,471 <br><span class="x-small">FP</span></div>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-3 fw-bold small text-end pe-2">Actual Sepsis</div>
+                            <div class="col-4 p-4 border bg-danger text-white fw-bold" style="background-color: #dc3545 !important;">
+                                17,860 <br><span class="x-small">FN (Danger)</span>
+                            </div>
+                            <div class="col-4 p-4 border bg-primary text-white">278,381 <br><span class="x-small">TP</span></div>
+                        </div>
+                    </div>
+                    <p class="x-small text-center text-muted mt-3">*Metrics derived from hold-out stay-level test set.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card p-4 shadow-sm border-0 h-100">
+                    <h5 class="fw-bold mb-3">Model Benchmarks</h5>
+                    <table id="modelTable" class="table table-hover small">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>ROC-AUC</th>
+                                <th>PR-AUC</th>
+                                <th>F1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Random Forest</strong></td>
+                                <td>0.842</td>
+                                <td>0.925</td>
+                                <td>0.862</td>
+                            </tr>
+                            <tr>
+                                <td>DNN</td>
+                                <td>0.976</td>
+                                <td>0.643</td>
+                                <td>0.620</td>
+                            </tr>
+                            <tr>
+                                <td>RNN</td>
+                                <td>0.920</td>
+                                <td>0.380</td>
+                                <td>0.428</td>
+                            </tr>
+                            <tr>
+                                <td>Logistic Regression</td>
+                                <td>0.736</td>
+                                <td>0.140</td>
+                                <td>0.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="x-small text-muted mt-2">
+                        While the DNN achieved a higher ROC-AUC (0.976), the <strong>Random Forest</strong> was selected as the optimal clinical tool due to its significantly higher PR-AUC (0.925) and F1 Score (0.862).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    
+<section id="conclusion" class="py-5 bg-light border-top">
+    <div class="container">
+        <div class="row mb-5 text-center">
+            <div class="col-lg-12">
+                <h2 class="fw-bold medical-blue">Project Conclusion</h2>
+                <p class="lead">From high-fidelity research to proactive clinical intervention.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm p-4">
+                    <h5 class="fw-bold mb-3">Key Research Outcomes</h5>
+                    <p class="small text-muted">
+                        Our investigation into the <strong>MIMIC-IV ICU Module</strong> demonstrates that an hour-level prediction framework can successfully forecast sepsis onset 1–4 hours in advance.
+                    </p>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item bg-transparent"><strong>High Detection Fidelity:</strong> Achieving 94% sensitivity and 44% specificity.</li>
+                        <li class="list-group-item bg-transparent"><strong>Clinically Actionable Alerts:</strong> Achieving alert enrichment more than 10× over baseline prevalence to combat alert fatigue.</li>
+                        <li class="list-group-item bg-transparent"><strong>Phenotype Awareness:</strong> Proving that integrating multimorbidity context captures essential patient heterogeneity for better ICU risk prediction.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm p-4 border-start border-4 border-info">
+                    <h5 class="fw-bold mb-3 medical-blue">The Path to Deployment</h5>
+                    <p class="small text-muted">
+                        Our next primary objective is to transition this framework from a research environment to a live clinical tool. 
+                    </p>
+                    <div class="p-3 rounded mb-3" style="background-color: #e0f2fe;">
+                        <h6 class="fw-bold mb-2 small text-dark">Collaboration: AWS API & Dashboard</h6>
+                        <p class="x-small mb-0 text-dark">
+                            We are currently collaborating with a partner team to deploy our <strong>Random Forest model on AWS</strong> via an API inference service.
+                        </p>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        We are developing a <strong>Clinical Decision Support Dashboard</strong>. By integrating our phenotype-aware risk scores into this dashboard, we aim to provide ICU doctors with proactive alerts, enabling life-saving interventions before clinical sepsis onset occurs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+   
+
+    
     <section class="container my-5 text-center">
         <div class="py-5 border-top">
             <h4 class="fw-bold">Research Contributions</h4>
